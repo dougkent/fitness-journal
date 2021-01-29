@@ -1,0 +1,15 @@
+{
+  "develop": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-fitnessjournal-develop-102940-authRole",
+      "UnauthRoleArn": "arn:aws:iam::866938331794:role/amplify-fitnessjournal-develop-102940-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::866938331794:role/amplify-fitnessjournal-develop-102940-authRole",
+      "Region": "us-west-2",
+      "DeploymentBucketName": "amplify-fitnessjournal-develop-102940-deployment",
+      "UnauthRoleName": "amplify-fitnessjournal-develop-102940-unauthRole",
+      "StackName": "amplify-fitnessjournal-develop-102940",
+      "StackId": "arn:aws:cloudformation:us-west-2:866938331794:stack/amplify-fitnessjournal-develop-102940/32c74270-624f-11eb-b342-06b6e9e70973",
+      "AmplifyAppId": "da8txs3dh33s7"
+    }
+  }
+}
