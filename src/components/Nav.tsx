@@ -2,6 +2,9 @@
 import React from 'react';
 import * as ReactRouter from 'react-router-dom';
 
+// AWS
+import { AmplifySignOut } from '@aws-amplify/ui-react';
+
 // Material UI
 import {
     AppBar,
@@ -17,6 +20,10 @@ import { fjTheme } from '../themes';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
+        flex: {
+            display: 'flex',
+            justifyContent: 'space-between',
+        },
         navLink: {
             textDecoration: 'none',
             color: 'inherit',
@@ -40,11 +47,14 @@ const Nav: React.FC = () => {
     return (
         <>
             <AppBar position='sticky' color='default'>
-                <Toolbar>
-                    <Typography variant='h5'>
+                <Toolbar className={classes.flex}>
+                    <Typography variant='h5' noWrap>
                         <ReactRouter.Link to='/' className={classes.navLink}>
                             Fitness Journal
                         </ReactRouter.Link>
+                    </Typography>
+                    <Typography variant='h5' noWrap color='primary'>
+                        <AmplifySignOut />
                     </Typography>
                 </Toolbar>
             </AppBar>

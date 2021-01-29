@@ -1,0 +1,9 @@
+:root {
+    --amplify-primary-color: #095b06;
+    --amplify-primary-tint: var(--amplify-primary-color);
+    --amplify-primary-shade: var(--amplify-primary-color);
+    --amplify-secondary-color: #3d3d3d;
+    --amplify-secondary-tint: var(--amplify-secondary-color);
+    --amplify-secondary-shade: var(--amplify-secondary-color);
+    --amplify-font-family: 'Barlow', sans-serif;
+}

@@ -10,6 +10,11 @@
       "StackName": "amplify-fitnessjournal-develop-102940",
       "StackId": "arn:aws:cloudformation:us-west-2:866938331794:stack/amplify-fitnessjournal-develop-102940/32c74270-624f-11eb-b342-06b6e9e70973",
       "AmplifyAppId": "da8txs3dh33s7"
+    },
+    "categories": {
+      "auth": {
+        "fitnessjournalauth": {}
+      }
     }
   }
 }
