@@ -1,0 +1,35 @@
+type JournalEntry
+    @model(timestamps: { createdAt: "createdDate" })
+    @auth(rules: [{ allow: owner }]) {
+    id: ID!
+    program: String!
+    mobility: String
+    nutrition: NutritionEntry
+    sleep: SleepEntry
+    notes: String
+}
+
+type NutritionEntry {
+    hydrated: Boolean!
+    carbs: Level
+    gluten: Level
+    supplements: String
+    caffeine: CaffeineEntry
+}
+
+type CaffeineEntry {
+    am: String
+    pm: String
+}
+
+type SleepEntry {
+    quantity: Float!
+    quality: Int!
+}
+
+enum Level {
+    None
+    Low
+    Medium
+    High
+}
