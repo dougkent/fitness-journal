@@ -1,6 +1,6 @@
 import { NutritionEntry, SleepEntry } from ".";
 
-export interface JournalEntryModel
+export interface CreateJournalEntryInput
 {
     id: string;
     program: string;
@@ -8,5 +8,5 @@ export interface JournalEntryModel
     nutrition: NutritionEntry;
     sleep: SleepEntry;
     notes: string;
-    createdDate: string;
+
 }

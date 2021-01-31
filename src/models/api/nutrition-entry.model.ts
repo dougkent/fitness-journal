@@ -1,4 +1,4 @@
-import { Level } from "./.";
+import { Level, CaffeineEntry } from ".";
 
 export interface NutritionEntry
 {
@@ -6,4 +6,5 @@ export interface NutritionEntry
     carbs: Level;
     gluten: Level;
     supplements: string
+    caffeine: CaffeineEntry;
 }

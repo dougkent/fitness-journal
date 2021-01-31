@@ -1,8 +1,9 @@
-import { JournalEntry } from "../api";
+import { JournalEntryModel } from "../api";
 
 export interface JournalEntriesListState
 {
     loading: boolean;
-    journalEntries: JournalEntry[];
+    journalEntries: JournalEntryModel[];
     nextToken: string;
+    drawerOpen: boolean;
 }

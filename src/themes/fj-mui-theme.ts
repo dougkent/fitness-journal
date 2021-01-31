@@ -21,8 +21,8 @@ const fjTheme = createMuiTheme({
     },
     typography: {
         fontFamily: '"Barlow", sans-serif',
-        fontSize: 12,
-        fontWeightRegular: 300,
+        fontSize: 14,
+        fontWeightRegular: 400,
         h1: {
             fontFamily: '"Barlow", serif',
             fontWeight: 600,
