@@ -1,7 +1,6 @@
-import { JournalEntry } from "./journal-entry.model";
+import { JournalEntryConnectionModel } from ".";
 
 export interface ListJournalEntries
 {
-    items: JournalEntry[];
-    nextToken: string;
+    listJournalEntrys: JournalEntryConnectionModel;
 }
