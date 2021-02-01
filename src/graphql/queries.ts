@@ -1,5 +1,5 @@
-export const listJournalEntries = `query ListJournalEntries($nextToken: String) {
-    listJournalEntrys (limit: 30, nextToken: $nextToken) {
+export const listJournalEntries = `query ListJournalEntries($filter: ModelJournalEntryFilterInput, $nextToken: String) {
+    listJournalEntrys (filter: $filter, limit: 30, nextToken: $nextToken) {
         nextToken
         items {
             id

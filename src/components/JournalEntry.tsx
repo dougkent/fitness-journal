@@ -25,6 +25,7 @@ import { EditorState, convertToRaw } from 'draft-js';
 import { JournalEntryModel, Level } from '../models/api';
 import { JournalEntryProps } from '../models/props/journal-entry.props';
 import { fjTheme } from '../themes';
+import { JournalEntryIdService } from '../services';
 
 const useStyles = makeStyles((theme: Theme) =>
     createStyles({
@@ -48,26 +49,12 @@ const useStyles = makeStyles((theme: Theme) =>
     })
 );
 
-const getId = (date: Date): string => {
-    const year = date.getFullYear();
-    let month = date.getMonth() + 1;
-    let day = date.getDate();
-
-    return year + '-' + getTwoDigitNumber(month) + '-' + getTwoDigitNumber(day);
-};
-
-const getTwoDigitNumber = (num: number): string => {
-    if (num < 10) {
-        return '0' + num.toString();
-    } else {
-        return num.toString();
-    }
-};
+const idService = new JournalEntryIdService();
 
 const date = new Date();
 
 const emptyState: JournalEntryModel = {
-    id: getId(date),
+    id: idService.getId(date),
     program: '',
     mobility: '',
     nutrition: {
