@@ -8,6 +8,7 @@ import { GraphQLResult } from '@aws-amplify/api';
 // Material UI
 import {
     Button,
+    ButtonGroup,
     CircularProgress,
     createStyles,
     SwipeableDrawer,
@@ -16,6 +17,8 @@ import {
     withStyles,
     WithStyles,
 } from '@material-ui/core';
+import DetailsIcon from '@material-ui/icons/Details';
+import EditIcon from '@material-ui/icons/Edit';
 
 // FJ
 import * as graphQLQueries from '../graphql/queries';
@@ -29,6 +32,7 @@ import {
 import { JournalEntriesListState } from '../models/states';
 import { fjTheme } from '../themes';
 import { JournalEntry } from '../components';
+import { JournalEntryIdService } from '../services';
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -48,8 +52,25 @@ const styles = (theme: Theme) =>
             padding: theme.spacing(2),
         },
         loading: {
-            width: theme.spacing(12.5),
+            width: '100%',
             margin: `${theme.spacing(4)}px auto`,
+            display: 'flex',
+            justifyContent: 'center',
+        },
+        row: {
+            marginBottom: theme.spacing(2),
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+        },
+        rowItem: {
+            width: '33%',
+        },
+        buttonGroup: {
+            width: '100%',
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
         },
     });
 
@@ -62,19 +83,44 @@ class JournalEntries extends React.Component<
     constructor(props: any) {
         super(props);
 
+        const date: Date = new Date();
+        date.setDate(date.getDate() + 1);
+
         this.state = {
             loading: false,
             journalEntries: [],
             nextToken: null,
             drawerOpen: false,
+            lastQueryDate: date,
+            noMoreEntries: false,
         };
     }
+
+    private idService = new JournalEntryIdService();
 
     componentDidMount = async () => {
         await this.loadJournalEntries();
     };
 
-    handleCreateJournalEntry = async (journalEntry: JournalEntryModel) => {
+    private getPreviewText = (rteText: string): string => {
+        const jsonObj = JSON.parse(rteText);
+
+        let preview: string = '';
+
+        jsonObj.blocks.forEach((block: any) => {
+            if (preview.length) {
+                preview = preview + '  ';
+            }
+
+            preview = preview + block.text;
+        });
+
+        return preview;
+    };
+
+    private handleCreateJournalEntry = async (
+        journalEntry: JournalEntryModel
+    ) => {
         this.setState({
             loading: true,
         });
@@ -100,37 +146,76 @@ class JournalEntries extends React.Component<
         });
 
         if (result.data?.createJournalEntry?.id) {
+            const date: Date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            await this.setState({
+                lastQueryDate: date,
+            });
+
             await this.loadJournalEntries();
         }
     };
 
-    loadJournalEntries = async () => {
+    private loadJournalEntries = async () => {
         this.setState({
             loading: true,
         });
 
+        const pageSize = 14;
+
+        let upperDate = new Date(this.state.lastQueryDate.getTime());
+        upperDate.setDate(upperDate.getDate() - 1);
+        let lowerDate = new Date(this.state.lastQueryDate.getTime());
+        lowerDate.setDate(lowerDate.getDate() - 1 - pageSize);
+        const upperBounds: string = this.idService.getId(upperDate);
+        const lowerBounds: string = this.idService.getId(lowerDate);
+
+        const filter: any = {
+            id: {
+                between: [lowerBounds, upperBounds],
+            },
+        };
+
         const result = (await API.graphql(
             graphqlOperation(graphQLQueries.listJournalEntries, {
+                filter: filter,
                 nextToken: this.state.nextToken,
             })
         )) as GraphQLResult<ListJournalEntries>;
 
         if (result.data?.listJournalEntrys?.items?.length) {
+            const newJournalEntries = [
+                ...this.state.journalEntries,
+                ...result.data.listJournalEntrys.items,
+            ];
+
             this.setState({
-                journalEntries: [
-                    ...this.state.journalEntries,
-                    ...result.data.listJournalEntrys.items,
-                ],
+                journalEntries: newJournalEntries.sort((a, b) => {
+                    const idA = a.id;
+                    const idB = b.id;
+
+                    if (idA > idB) return -1;
+                    if (idA < idB) return 1;
+                    return 0;
+                }),
                 nextToken: result.data.listJournalEntrys.nextToken,
+                noMoreEntries:
+                    result.data.listJournalEntrys.items.length < pageSize,
+            });
+        } else {
+            this.setState({
+                noMoreEntries: true,
             });
         }
 
         this.setState({
+            lastQueryDate: lowerDate,
             loading: false,
         });
     };
 
-    toggleDrawer = (open: boolean) => (
+    private toggleDrawer = (open: boolean) => (
         event: React.KeyboardEvent | React.MouseEvent
     ) => {
         this.setState({
@@ -143,39 +228,63 @@ class JournalEntries extends React.Component<
 
         return (
             <div className={classes.container}>
-                {this.state.loading && (
-                    <div className={classes.loading}>
-                        <CircularProgress />
+                <div>
+                    <Typography variant='h3' className={classes.row}>
+                        Journal Entries
+                    </Typography>
+                    <div className={classes.row}>
+                        <Button
+                            onClick={this.toggleDrawer(true)}
+                            variant='contained'
+                            color='secondary'>
+                            Create Journal Entry
+                        </Button>
                     </div>
-                )}
-                {!this.state.loading && (
-                    <div>
-                        <Typography variant='h3'>Journal Entries</Typography>
-                        <div>
-                            <Button
-                                onClick={this.toggleDrawer(true)}
-                                variant='contained'
-                                color='secondary'>
-                                Create Journal Entry
+                    {this.state.journalEntries.map((journalEntry) => (
+                        <div className={classes.row} key={journalEntry.id}>
+                            <Typography className={classes.rowItem}>
+                                {journalEntry.id}
+                            </Typography>
+                            <Typography noWrap className={classes.rowItem}>
+                                {this.getPreviewText(journalEntry.program)}
+                            </Typography>
+                            <div className={classes.rowItem}>
+                                <ButtonGroup className={classes.buttonGroup}>
+                                    <Button size='small'>
+                                        <DetailsIcon />
+                                    </Button>
+                                    <Button size='small'>
+                                        <EditIcon />
+                                    </Button>
+                                </ButtonGroup>
+                            </div>
+                        </div>
+                    ))}
+                    {this.state.loading && (
+                        <div className={classes.loading}>
+                            <CircularProgress />
+                        </div>
+                    )}
+                    {!this.state.noMoreEntries && !this.state.loading && (
+                        <div className={classes.row}>
+                            <Button onClick={this.loadJournalEntries}>
+                                Load Next Page
                             </Button>
                         </div>
-                        {this.state.journalEntries.map((journalEntry) => (
-                            <div>{journalEntry.id}</div>
-                        ))}
-                        <SwipeableDrawer
-                            anchor='bottom'
-                            open={this.state.drawerOpen}
-                            onClose={this.toggleDrawer(false)}
-                            onOpen={this.toggleDrawer(true)}>
-                            <div className={classes.drawer}>
-                                <JournalEntry
-                                    isReadonly={false}
-                                    onSave={this.handleCreateJournalEntry}
-                                />
-                            </div>
-                        </SwipeableDrawer>
-                    </div>
-                )}
+                    )}
+                    <SwipeableDrawer
+                        anchor='bottom'
+                        open={this.state.drawerOpen}
+                        onClose={this.toggleDrawer(false)}
+                        onOpen={this.toggleDrawer(true)}>
+                        <div className={classes.drawer}>
+                            <JournalEntry
+                                isReadonly={false}
+                                onSave={this.handleCreateJournalEntry}
+                            />
+                        </div>
+                    </SwipeableDrawer>
+                </div>
             </div>
         );
     }
