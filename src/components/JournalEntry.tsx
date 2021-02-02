@@ -203,7 +203,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 label='Date *'
                 fullWidth
                 value={journalEntry.id}
-                margin='normal'
+                disabled={props.isReadonly}
             />
             <div className={classes.formRow}>
                 <FormLabel className={classes.formLabel}>Program *</FormLabel>
@@ -229,20 +229,22 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 onChange={handleTextChange}
                 label='Mobility'
                 fullWidth
+                disabled={props.isReadonly}
             />
-            <FormControl fullWidth margin='normal'>
+            <FormControl fullWidth>
                 <FormControlLabel
                     label='Hydrated?'
-                    value={journalEntry.nutrition.hydrated}
                     control={
                         <Switch
                             color='secondary'
+                            checked={journalEntry.nutrition.hydrated}
                             onChange={handleHydratedSwitchChange}
                         />
                     }
+                    disabled={props.isReadonly}
                 />
             </FormControl>
-            <FormControl fullWidth margin='normal'>
+            <FormControl fullWidth disabled={props.isReadonly}>
                 <InputLabel id='label-carbs'>Carbs?</InputLabel>
                 <Select
                     labelId='label-carbs'
@@ -255,7 +257,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                     <MenuItem value={Level.High}>High</MenuItem>
                 </Select>
             </FormControl>
-            <FormControl fullWidth margin='normal'>
+            <FormControl fullWidth disabled={props.isReadonly}>
                 <InputLabel id='label-gluten'>Gluten?</InputLabel>
                 <Select
                     labelId='label-gluten'
@@ -275,6 +277,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 label='Supplements'
                 fullWidth
                 value={journalEntry.nutrition.supplements}
+                disabled={props.isReadonly}
             />
             <div className={`${classes.formRow} ${classes.formRowMargin}`}>
                 <FormLabel className={classes.formLabel}>Caffeine</FormLabel>
@@ -285,6 +288,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                     label='AM'
                     value={journalEntry.nutrition.caffeine.am}
                     className={classes.formItem}
+                    disabled={props.isReadonly}
                 />
                 <TextField
                     inputProps={{ maxLength: 100 }}
@@ -293,6 +297,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                     label='PM'
                     value={journalEntry.nutrition.caffeine.pm}
                     className={classes.formItem}
+                    disabled={props.isReadonly}
                 />
             </div>
             <div className={`${classes.formRow} ${classes.formRowMargin}`}>
@@ -307,6 +312,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                         endAdornment: <label>hours</label>,
                     }}
                     className={classes.formItem}
+                    disabled={props.isReadonly}
                 />
                 <TextField
                     inputProps={{ maxLength: 100 }}
@@ -318,11 +324,12 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                         endAdornment: <label>/10</label>,
                     }}
                     className={classes.formItem}
+                    disabled={props.isReadonly}
                 />
             </div>
             <div className={classes.formRow}>
                 <FormLabel className={classes.formLabel}>Notes</FormLabel>
-                <FormControl fullWidth margin='normal'>
+                <FormControl fullWidth>
                     <MUIRichTextEditor
                         defaultValue={props.journalEntry?.notes}
                         onChange={handleNotesChange}

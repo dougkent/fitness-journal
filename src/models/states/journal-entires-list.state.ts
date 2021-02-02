@@ -4,7 +4,8 @@ export interface JournalEntriesListState
 {
     loading: boolean;
     journalEntries: JournalEntryModel[];
-    nextToken: string;
+    selectedJournalEntry: JournalEntryModel | null;
+    isReadonly: boolean;
     lastQueryDate: Date;
     noMoreEntries: boolean;
     drawerOpen: boolean;
