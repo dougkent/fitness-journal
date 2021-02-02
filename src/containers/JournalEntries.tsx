@@ -11,6 +11,7 @@ import {
     ButtonGroup,
     CircularProgress,
     createStyles,
+    Hidden,
     SwipeableDrawer,
     Theme,
     Typography,
@@ -19,7 +20,6 @@ import {
 } from '@material-ui/core';
 import DetailsIcon from '@material-ui/icons/Details';
 import EditIcon from '@material-ui/icons/Edit';
-import CloseIcon from '@material-ui/icons/Close';
 
 // FJ
 import * as graphQLQueries from '../graphql/queries';
@@ -37,26 +37,24 @@ import { JournalEntryIdService } from '../services';
 
 const styles = (theme: Theme) =>
     createStyles({
-        container: {
+        journalEntries: {
             marginTop: theme.spacing(2),
             [theme.breakpoints.up('lg')]: {
                 marginTop: theme.spacing(4),
-                width: '100%',
                 display: 'flex',
-                justifyContent: 'space-evenly',
-            },
-            [theme.breakpoints.up('xl')]: {
+                justifyContent: 'space-between',
                 flexWrap: 'wrap',
+            },
+        },
+        container: {
+            [theme.breakpoints.up('lg')]: {
+                width: '48%',
             },
         },
         drawer: {
             padding: `${theme.spacing(1)}px ${theme.spacing(
                 2
             )}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
-        },
-        drawerActions: {
-            display: 'flex',
-            justifyContent: 'flex-end',
         },
         loading: {
             width: '100%',
@@ -65,6 +63,7 @@ const styles = (theme: Theme) =>
             justifyContent: 'center',
         },
         row: {
+            width: '100%',
             marginBottom: theme.spacing(2),
             display: 'flex',
             justifyContent: 'space-between',
@@ -96,7 +95,7 @@ class JournalEntries extends React.Component<
         this.state = {
             loading: false,
             journalEntries: [],
-            drawerOpen: false,
+            entryOpen: false,
             lastQueryDate: date,
             noMoreEntries: false,
             selectedJournalEntry: null,
@@ -141,7 +140,7 @@ class JournalEntries extends React.Component<
 
         this.setState({
             loading: false,
-            drawerOpen: false,
+            entryOpen: false,
             selectedJournalEntry: null,
         });
 
@@ -172,7 +171,7 @@ class JournalEntries extends React.Component<
 
         this.setState({
             loading: false,
-            drawerOpen: false,
+            entryOpen: false,
             selectedJournalEntry: null,
         });
 
@@ -262,40 +261,40 @@ class JournalEntries extends React.Component<
         });
     };
 
-    private openCreateDrawer = (
+    private openCreateEntry = (
         event: React.KeyboardEvent | React.MouseEvent
     ) => {
         this.setState({
             selectedJournalEntry: null,
             isReadonly: false,
-            drawerOpen: true,
+            entryOpen: true,
         });
     };
 
-    private openViewDrawer = (journalEntry: JournalEntryModel) => (
+    private openViewEntry = (journalEntry: JournalEntryModel) => (
         event: React.KeyboardEvent | React.MouseEvent
     ) => {
         this.setState({
             selectedJournalEntry: journalEntry,
             isReadonly: true,
-            drawerOpen: true,
+            entryOpen: true,
         });
     };
 
-    private openEditDrawer = (journalEntry: JournalEntryModel) => (
+    private openEditEntry = (journalEntry: JournalEntryModel) => (
         event: React.KeyboardEvent | React.MouseEvent
     ) => {
         this.setState({
             selectedJournalEntry: journalEntry,
             isReadonly: false,
-            drawerOpen: true,
+            entryOpen: true,
         });
     };
 
-    private closeDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
+    private closeEntry = (event: React.KeyboardEvent | React.MouseEvent) => {
         this.setState({
             selectedJournalEntry: null,
-            drawerOpen: false,
+            entryOpen: false,
         });
     };
 
@@ -303,14 +302,14 @@ class JournalEntries extends React.Component<
         const { classes } = this.props;
 
         return (
-            <div className={classes.container}>
-                <div>
-                    <Typography variant='h3' className={classes.row}>
-                        Journal Entries
-                    </Typography>
+            <div className={classes.journalEntries}>
+                <Typography variant='h3' className={classes.row}>
+                    Journal Entries
+                </Typography>
+                <div className={classes.container}>
                     <div className={classes.row}>
                         <Button
-                            onClick={this.openCreateDrawer}
+                            onClick={this.openCreateEntry}
                             variant='contained'
                             color='secondary'>
                             Create Journal Entry
@@ -328,17 +327,19 @@ class JournalEntries extends React.Component<
                                 <ButtonGroup className={classes.buttonGroup}>
                                     <Button
                                         size='small'
-                                        onClick={this.openViewDrawer(
+                                        onClick={this.openViewEntry(
                                             journalEntry
                                         )}>
                                         <DetailsIcon />
+                                        <Hidden xsDown>&nbsp;View</Hidden>
                                     </Button>
                                     <Button
                                         size='small'
-                                        onClick={this.openEditDrawer(
+                                        onClick={this.openEditEntry(
                                             journalEntry
                                         )}>
                                         <EditIcon />
+                                        <Hidden xsDown>&nbsp;Edit</Hidden>
                                     </Button>
                                 </ButtonGroup>
                             </div>
@@ -356,25 +357,37 @@ class JournalEntries extends React.Component<
                             </Button>
                         </div>
                     )}
-                    <SwipeableDrawer
-                        anchor='bottom'
-                        open={this.state.drawerOpen}
-                        onClose={this.closeDrawer}
-                        onOpen={this.openCreateDrawer}>
-                        <div className={classes.drawer}>
-                            <div className={classes.drawerActions}>
-                                <Button onClick={this.closeDrawer} size='small'>
-                                    <CloseIcon />
-                                </Button>
+                    <Hidden lgUp>
+                        <SwipeableDrawer
+                            anchor='bottom'
+                            open={this.state.entryOpen}
+                            onClose={this.closeEntry}
+                            onOpen={this.openCreateEntry}>
+                            <div className={classes.drawer}>
+                                <JournalEntry
+                                    isReadonly={this.state.isReadonly}
+                                    journalEntry={
+                                        this.state.selectedJournalEntry
+                                    }
+                                    onSave={this.handleSave}
+                                    onClose={this.closeEntry}
+                                />
                             </div>
+                        </SwipeableDrawer>
+                    </Hidden>
+                </div>
+                <Hidden mdDown>
+                    {this.state.entryOpen && (
+                        <div className={classes.container}>
                             <JournalEntry
                                 isReadonly={this.state.isReadonly}
                                 journalEntry={this.state.selectedJournalEntry}
                                 onSave={this.handleSave}
+                                onClose={this.closeEntry}
                             />
                         </div>
-                    </SwipeableDrawer>
-                </div>
+                    )}
+                </Hidden>
             </div>
         );
     }

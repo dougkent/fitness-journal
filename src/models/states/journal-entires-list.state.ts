@@ -8,5 +8,5 @@ export interface JournalEntriesListState
     isReadonly: boolean;
     lastQueryDate: Date;
     noMoreEntries: boolean;
-    drawerOpen: boolean;
+    entryOpen: boolean;
 }

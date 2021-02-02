@@ -3,18 +3,23 @@ import { createMuiTheme } from '@material-ui/core/styles';
 
 const fjTheme = createMuiTheme({
     palette: {
+        type: 'dark',
         primary: {
-            main: '#3d3d3d',
+            main: '#263238',
         },
         secondary: {
-            main: '#095b06',
+            main: '#1976d2',
         },
         error: {
             main: red.A200,
         },
-        background: {
-            default: '#f4f4f6',
+        text: {
+            disabled: '#bdbdbd',
         },
+        background: {
+            default: '#263238',
+            paper: '#4f5b62'
+        }
     },
     shape: {
         borderRadius: 0,
