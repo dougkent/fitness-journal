@@ -1,4 +1,4 @@
-import { JournalEntryModel } from "./.";
+import { JournalEntryModel } from ".";
 
 export interface CreateJournalEntryMutation {
     createJournalEntry: JournalEntryModel;

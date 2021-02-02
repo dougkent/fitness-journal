@@ -5,5 +5,5 @@ export * from './caffeine-entry.model';
 export * from './journal-entry.model';
 export * from './query-list-journal-entires.model';
 export * from './mutation-create-journal-entry.model';
-export * from './create-journal-entry.input';
 export * from './journal-entry-connection.model';
+export * from './mutation-update-journal-entry.model';

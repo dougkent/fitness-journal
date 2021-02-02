@@ -19,15 +19,16 @@ import {
 } from '@material-ui/core';
 import DetailsIcon from '@material-ui/icons/Details';
 import EditIcon from '@material-ui/icons/Edit';
+import CloseIcon from '@material-ui/icons/Close';
 
 // FJ
 import * as graphQLQueries from '../graphql/queries';
 import * as graphQlMutations from '../graphql/mutations';
 import {
-    CreateJournalEntryInput,
     CreateJournalEntryMutation,
     JournalEntryModel,
     ListJournalEntries,
+    UpdateJournalEntryMutation,
 } from '../models/api';
 import { JournalEntriesListState } from '../models/states';
 import { fjTheme } from '../themes';
@@ -49,7 +50,13 @@ const styles = (theme: Theme) =>
             },
         },
         drawer: {
-            padding: theme.spacing(2),
+            padding: `${theme.spacing(1)}px ${theme.spacing(
+                2
+            )}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
+        },
+        drawerActions: {
+            display: 'flex',
+            justifyContent: 'flex-end',
         },
         loading: {
             width: '100%',
@@ -89,10 +96,11 @@ class JournalEntries extends React.Component<
         this.state = {
             loading: false,
             journalEntries: [],
-            nextToken: null,
             drawerOpen: false,
             lastQueryDate: date,
             noMoreEntries: false,
+            selectedJournalEntry: null,
+            isReadonly: false,
         };
     }
 
@@ -109,13 +117,44 @@ class JournalEntries extends React.Component<
 
         jsonObj.blocks.forEach((block: any) => {
             if (preview.length) {
-                preview = preview + '  ';
+                preview = preview + ' ';
             }
 
             preview = preview + block.text;
         });
 
         return preview;
+    };
+
+    private handleUpdateJournalEntry = async (
+        journalEntry: JournalEntryModel
+    ) => {
+        this.setState({
+            loading: true,
+        });
+
+        const result = (await API.graphql(
+            graphqlOperation(graphQlMutations.updateJournalEntry, {
+                input: journalEntry,
+            })
+        )) as GraphQLResult<UpdateJournalEntryMutation>;
+
+        this.setState({
+            loading: false,
+            drawerOpen: false,
+            selectedJournalEntry: null,
+        });
+
+        if (result.data?.updateJournalEntry?.id) {
+            const date: Date = new Date();
+            date.setDate(date.getDate() + 1);
+
+            await this.setState({
+                lastQueryDate: date,
+            });
+
+            await this.loadJournalEntries(true);
+        }
     };
 
     private handleCreateJournalEntry = async (
@@ -125,24 +164,16 @@ class JournalEntries extends React.Component<
             loading: true,
         });
 
-        const input: CreateJournalEntryInput = {
-            id: journalEntry.id,
-            program: journalEntry.program,
-            mobility: journalEntry.mobility,
-            nutrition: journalEntry.nutrition,
-            sleep: journalEntry.sleep,
-            notes: journalEntry.notes,
-        };
-
         const result = (await API.graphql(
             graphqlOperation(graphQlMutations.createJournalEntry, {
-                input: input,
+                input: journalEntry,
             })
         )) as GraphQLResult<CreateJournalEntryMutation>;
 
         this.setState({
             loading: false,
             drawerOpen: false,
+            selectedJournalEntry: null,
         });
 
         if (result.data?.createJournalEntry?.id) {
@@ -153,11 +184,23 @@ class JournalEntries extends React.Component<
                 lastQueryDate: date,
             });
 
-            await this.loadJournalEntries();
+            await this.loadJournalEntries(true);
         }
     };
 
-    private loadJournalEntries = async () => {
+    private handleNextPage = async () => {
+        this.loadJournalEntries();
+    };
+
+    private handleSave = async (journalEntry: JournalEntryModel) => {
+        if (this.state.selectedJournalEntry) {
+            await this.handleUpdateJournalEntry(journalEntry);
+        } else {
+            await this.handleCreateJournalEntry(journalEntry);
+        }
+    };
+
+    private loadJournalEntries = async (isRefresh: boolean = false) => {
         this.setState({
             loading: true,
         });
@@ -180,15 +223,20 @@ class JournalEntries extends React.Component<
         const result = (await API.graphql(
             graphqlOperation(graphQLQueries.listJournalEntries, {
                 filter: filter,
-                nextToken: this.state.nextToken,
             })
         )) as GraphQLResult<ListJournalEntries>;
 
         if (result.data?.listJournalEntrys?.items?.length) {
-            const newJournalEntries = [
-                ...this.state.journalEntries,
-                ...result.data.listJournalEntrys.items,
-            ];
+            let newJournalEntries: JournalEntryModel[];
+
+            if (isRefresh) {
+                newJournalEntries = result.data.listJournalEntrys.items;
+            } else {
+                newJournalEntries = [
+                    ...this.state.journalEntries,
+                    ...result.data.listJournalEntrys.items,
+                ];
+            }
 
             this.setState({
                 journalEntries: newJournalEntries.sort((a, b) => {
@@ -199,7 +247,6 @@ class JournalEntries extends React.Component<
                     if (idA < idB) return 1;
                     return 0;
                 }),
-                nextToken: result.data.listJournalEntrys.nextToken,
                 noMoreEntries:
                     result.data.listJournalEntrys.items.length < pageSize,
             });
@@ -215,11 +262,40 @@ class JournalEntries extends React.Component<
         });
     };
 
-    private toggleDrawer = (open: boolean) => (
+    private openCreateDrawer = (
         event: React.KeyboardEvent | React.MouseEvent
     ) => {
         this.setState({
-            drawerOpen: open,
+            selectedJournalEntry: null,
+            isReadonly: false,
+            drawerOpen: true,
+        });
+    };
+
+    private openViewDrawer = (journalEntry: JournalEntryModel) => (
+        event: React.KeyboardEvent | React.MouseEvent
+    ) => {
+        this.setState({
+            selectedJournalEntry: journalEntry,
+            isReadonly: true,
+            drawerOpen: true,
+        });
+    };
+
+    private openEditDrawer = (journalEntry: JournalEntryModel) => (
+        event: React.KeyboardEvent | React.MouseEvent
+    ) => {
+        this.setState({
+            selectedJournalEntry: journalEntry,
+            isReadonly: false,
+            drawerOpen: true,
+        });
+    };
+
+    private closeDrawer = (event: React.KeyboardEvent | React.MouseEvent) => {
+        this.setState({
+            selectedJournalEntry: null,
+            drawerOpen: false,
         });
     };
 
@@ -234,7 +310,7 @@ class JournalEntries extends React.Component<
                     </Typography>
                     <div className={classes.row}>
                         <Button
-                            onClick={this.toggleDrawer(true)}
+                            onClick={this.openCreateDrawer}
                             variant='contained'
                             color='secondary'>
                             Create Journal Entry
@@ -250,10 +326,18 @@ class JournalEntries extends React.Component<
                             </Typography>
                             <div className={classes.rowItem}>
                                 <ButtonGroup className={classes.buttonGroup}>
-                                    <Button size='small'>
+                                    <Button
+                                        size='small'
+                                        onClick={this.openViewDrawer(
+                                            journalEntry
+                                        )}>
                                         <DetailsIcon />
                                     </Button>
-                                    <Button size='small'>
+                                    <Button
+                                        size='small'
+                                        onClick={this.openEditDrawer(
+                                            journalEntry
+                                        )}>
                                         <EditIcon />
                                     </Button>
                                 </ButtonGroup>
@@ -267,7 +351,7 @@ class JournalEntries extends React.Component<
                     )}
                     {!this.state.noMoreEntries && !this.state.loading && (
                         <div className={classes.row}>
-                            <Button onClick={this.loadJournalEntries}>
+                            <Button onClick={this.handleNextPage}>
                                 Load Next Page
                             </Button>
                         </div>
@@ -275,12 +359,18 @@ class JournalEntries extends React.Component<
                     <SwipeableDrawer
                         anchor='bottom'
                         open={this.state.drawerOpen}
-                        onClose={this.toggleDrawer(false)}
-                        onOpen={this.toggleDrawer(true)}>
+                        onClose={this.closeDrawer}
+                        onOpen={this.openCreateDrawer}>
                         <div className={classes.drawer}>
+                            <div className={classes.drawerActions}>
+                                <Button onClick={this.closeDrawer} size='small'>
+                                    <CloseIcon />
+                                </Button>
+                            </div>
                             <JournalEntry
-                                isReadonly={false}
-                                onSave={this.handleCreateJournalEntry}
+                                isReadonly={this.state.isReadonly}
+                                journalEntry={this.state.selectedJournalEntry}
+                                onSave={this.handleSave}
                             />
                         </div>
                     </SwipeableDrawer>

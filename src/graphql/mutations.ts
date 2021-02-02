@@ -2,4 +2,10 @@ export const createJournalEntry = `mutation CreateJournalEntry($input: CreateJou
     createJournalEntry(input: $input) {
         id
     }
+}`;
+
+export const updateJournalEntry = `mutation UpdateJournalEntry($input: UpdateJournalEntryInput!) {
+    updateJournalEntry(input: $input) {
+        id
+    }
 }`
