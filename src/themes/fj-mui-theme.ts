@@ -4,9 +4,9 @@ import { createMuiTheme } from '@material-ui/core/styles';
 const fjTheme = createMuiTheme({
     palette: {
         type: 'dark',
-        primary: {
-            main: '#263238',
-        },
+        // primary: {
+        //     main: '#263238',
+        // },
         secondary: {
             main: '#1976d2',
         },
@@ -17,7 +17,7 @@ const fjTheme = createMuiTheme({
             disabled: '#bdbdbd',
         },
         background: {
-            default: '#263238',
+            default: '#353b3d',
             paper: '#4f5b62'
         }
     },
