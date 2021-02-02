@@ -4,6 +4,7 @@ import React from 'react';
 // Material UI
 import {
     Button,
+    Container,
     createStyles,
     FormControl,
     FormControlLabel,
@@ -16,6 +17,7 @@ import {
     TextField,
     Theme,
 } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
 
 // MUI RTE
 import MUIRichTextEditor from 'mui-rte';
@@ -45,6 +47,10 @@ const useStyles = makeStyles((theme: Theme) =>
         },
         formItem: {
             width: '48%',
+        },
+        actions: {
+            display: 'flex',
+            justifyContent: 'flex-end',
         },
     })
 );
@@ -83,6 +89,10 @@ const JournalEntry: React.FC<JournalEntryProps> = (
     const [journalEntry, setJournalEntry] = React.useState<JournalEntryModel>(
         props.journalEntry ?? emptyState
     );
+
+    React.useEffect(() => {
+        setJournalEntry(props.journalEntry ?? emptyState);
+    }, [props.journalEntry]);
 
     const handleCaffeineTextChange = (event: React.ChangeEvent) => {
         const element = event.target as HTMLInputElement;
@@ -196,6 +206,11 @@ const JournalEntry: React.FC<JournalEntryProps> = (
 
     return (
         <form onSubmit={handleSubmit}>
+            <div className={classes.actions}>
+                <Button onClick={props.onClose} size='small'>
+                    <CloseIcon />
+                </Button>
+            </div>
             <TextField
                 inputProps={{ maxLength: 50 }}
                 name='id'
@@ -348,13 +363,15 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 </FormControl>
             </div>
             {!props.isReadonly && (
-                <Button
-                    fullWidth
-                    variant='contained'
-                    color='secondary'
-                    type='submit'>
-                    Save
-                </Button>
+                <Container maxWidth='md'>
+                    <Button
+                        fullWidth
+                        variant='contained'
+                        color='secondary'
+                        type='submit'>
+                        Save
+                    </Button>
+                </Container>
             )}
         </form>
     );
