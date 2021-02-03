@@ -12,7 +12,6 @@ import {
     CircularProgress,
     createStyles,
     Hidden,
-    SwipeableDrawer,
     Theme,
     Typography,
     withStyles,
@@ -32,7 +31,7 @@ import {
 } from '../models/api';
 import { JournalEntriesListState } from '../models/states';
 import { fjTheme } from '../themes';
-import { JournalEntry } from '../components';
+import { JournalEntry, JournalEntryDialog } from '../components';
 import { JournalEntryIdService } from '../services';
 
 const styles = (theme: Theme) =>
@@ -50,11 +49,6 @@ const styles = (theme: Theme) =>
             [theme.breakpoints.up('lg')]: {
                 width: '48%',
             },
-        },
-        drawer: {
-            padding: `${theme.spacing(1)}px ${theme.spacing(
-                2
-            )}px ${theme.spacing(2)}px ${theme.spacing(2)}px`,
         },
         loading: {
             width: '100%',
@@ -358,22 +352,13 @@ class JournalEntries extends React.Component<
                         </div>
                     )}
                     <Hidden lgUp>
-                        <SwipeableDrawer
-                            anchor='bottom'
-                            open={this.state.entryOpen}
+                        <JournalEntryDialog
+                            isOpen={this.state.entryOpen}
+                            isReadonly={this.state.isReadonly}
+                            journalEntry={this.state.selectedJournalEntry}
+                            onSave={this.handleSave}
                             onClose={this.closeEntry}
-                            onOpen={this.openCreateEntry}>
-                            <div className={classes.drawer}>
-                                <JournalEntry
-                                    isReadonly={this.state.isReadonly}
-                                    journalEntry={
-                                        this.state.selectedJournalEntry
-                                    }
-                                    onSave={this.handleSave}
-                                    onClose={this.closeEntry}
-                                />
-                            </div>
-                        </SwipeableDrawer>
+                        />
                     </Hidden>
                 </div>
                 <Hidden mdDown>
