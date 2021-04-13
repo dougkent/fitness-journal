@@ -244,6 +244,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 onChange={handleTextChange}
                 label='Mobility'
                 fullWidth
+                value={journalEntry.mobility}
                 disabled={props.isReadonly}
             />
             <FormControl fullWidth>
