@@ -33,6 +33,7 @@ import { JournalEntriesListState } from '../models/states';
 import { fjTheme } from '../themes';
 import { JournalEntry, JournalEntryDialog } from '../components';
 import { JournalEntryIdService } from '../services';
+import { JournalEntriesProps } from '../models/props';
 
 const styles = (theme: Theme) =>
     createStyles({
@@ -74,10 +75,12 @@ const styles = (theme: Theme) =>
         },
     });
 
-export interface JournalEntriesProps extends WithStyles<typeof styles> {}
+export interface JournalEntriesContainerProps
+    extends JournalEntriesProps,
+        WithStyles<typeof styles> {}
 
 class JournalEntries extends React.Component<
-    JournalEntriesProps,
+    JournalEntriesContainerProps,
     JournalEntriesListState
 > {
     constructor(props: any) {
@@ -90,6 +93,7 @@ class JournalEntries extends React.Component<
             loading: false,
             journalEntries: [],
             entryOpen: false,
+            nextToken: null,
             lastQueryDate: date,
             noMoreEntries: false,
             selectedJournalEntry: null,
@@ -138,7 +142,7 @@ class JournalEntries extends React.Component<
             selectedJournalEntry: null,
         });
 
-        if (result.data?.updateJournalEntry?.id) {
+        if (result.data?.updateJournalEntryV2?.id) {
             const date: Date = new Date();
             date.setDate(date.getDate() + 1);
 
@@ -169,7 +173,7 @@ class JournalEntries extends React.Component<
             selectedJournalEntry: null,
         });
 
-        if (result.data?.createJournalEntry?.id) {
+        if (result.data?.createJournalEntryV2?.id) {
             const date: Date = new Date();
             date.setDate(date.getDate() + 1);
 
@@ -200,57 +204,33 @@ class JournalEntries extends React.Component<
 
         const pageSize = 14;
 
-        let upperDate = new Date(this.state.lastQueryDate.getTime());
-        upperDate.setDate(upperDate.getDate() - 1);
-        let lowerDate = new Date(this.state.lastQueryDate.getTime());
-        lowerDate.setDate(lowerDate.getDate() - 1 - pageSize);
-        const upperBounds: string = this.idService.getId(upperDate);
-        const lowerBounds: string = this.idService.getId(lowerDate);
-
-        const filter: any = {
-            id: {
-                between: [lowerBounds, upperBounds],
-            },
-        };
-
         const result = (await API.graphql(
             graphqlOperation(graphQLQueries.listJournalEntries, {
-                filter: filter,
+                id: this.props.userId,
+                limit: pageSize,
+                sortDirection: 'DESC',
             })
         )) as GraphQLResult<ListJournalEntries>;
 
-        if (result.data?.listJournalEntrys?.items?.length) {
+        if (result.data?.listJournalEntryV2s?.items?.length) {
             let newJournalEntries: JournalEntryModel[];
 
             if (isRefresh) {
-                newJournalEntries = result.data.listJournalEntrys.items;
+                newJournalEntries = result.data.listJournalEntryV2s.items;
             } else {
                 newJournalEntries = [
                     ...this.state.journalEntries,
-                    ...result.data.listJournalEntrys.items,
+                    ...result.data.listJournalEntryV2s.items,
                 ];
             }
 
             this.setState({
-                journalEntries: newJournalEntries.sort((a, b) => {
-                    const idA = a.id;
-                    const idB = b.id;
-
-                    if (idA > idB) return -1;
-                    if (idA < idB) return 1;
-                    return 0;
-                }),
-                noMoreEntries:
-                    result.data.listJournalEntrys.items.length < pageSize,
-            });
-        } else {
-            this.setState({
-                noMoreEntries: true,
+                journalEntries: newJournalEntries,
+                nextToken: result.data.listJournalEntryV2s.nextToken,
             });
         }
 
         this.setState({
-            lastQueryDate: lowerDate,
             loading: false,
         });
     };
@@ -265,25 +245,25 @@ class JournalEntries extends React.Component<
         });
     };
 
-    private openViewEntry = (journalEntry: JournalEntryModel) => (
-        event: React.KeyboardEvent | React.MouseEvent
-    ) => {
-        this.setState({
-            selectedJournalEntry: journalEntry,
-            isReadonly: true,
-            entryOpen: true,
-        });
-    };
+    private openViewEntry =
+        (journalEntry: JournalEntryModel) =>
+        (event: React.KeyboardEvent | React.MouseEvent) => {
+            this.setState({
+                selectedJournalEntry: journalEntry,
+                isReadonly: true,
+                entryOpen: true,
+            });
+        };
 
-    private openEditEntry = (journalEntry: JournalEntryModel) => (
-        event: React.KeyboardEvent | React.MouseEvent
-    ) => {
-        this.setState({
-            selectedJournalEntry: journalEntry,
-            isReadonly: false,
-            entryOpen: true,
-        });
-    };
+    private openEditEntry =
+        (journalEntry: JournalEntryModel) =>
+        (event: React.KeyboardEvent | React.MouseEvent) => {
+            this.setState({
+                selectedJournalEntry: journalEntry,
+                isReadonly: false,
+                entryOpen: true,
+            });
+        };
 
     private closeEntry = (event: React.KeyboardEvent | React.MouseEvent) => {
         this.setState({
@@ -312,7 +292,7 @@ class JournalEntries extends React.Component<
                     {this.state.journalEntries.map((journalEntry) => (
                         <div className={classes.row} key={journalEntry.id}>
                             <Typography className={classes.rowItem}>
-                                {journalEntry.id}
+                                {journalEntry.date}
                             </Typography>
                             <Typography noWrap className={classes.rowItem}>
                                 {this.getPreviewText(journalEntry.program)}
@@ -344,7 +324,7 @@ class JournalEntries extends React.Component<
                             <CircularProgress />
                         </div>
                     )}
-                    {!this.state.noMoreEntries && !this.state.loading && (
+                    {this.state.nextToken && !this.state.loading && (
                         <div className={classes.row}>
                             <Button onClick={this.handleNextPage}>
                                 Load Next Page
@@ -353,6 +333,7 @@ class JournalEntries extends React.Component<
                     )}
                     <Hidden lgUp>
                         <JournalEntryDialog
+                            userId={this.props.userId}
                             isOpen={this.state.entryOpen}
                             isReadonly={this.state.isReadonly}
                             journalEntry={this.state.selectedJournalEntry}
@@ -365,6 +346,7 @@ class JournalEntries extends React.Component<
                     {this.state.entryOpen && (
                         <div className={classes.container}>
                             <JournalEntry
+                                userId={this.props.userId}
                                 isReadonly={this.state.isReadonly}
                                 journalEntry={this.state.selectedJournalEntry}
                                 onSave={this.handleSave}

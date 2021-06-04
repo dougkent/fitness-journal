@@ -33,7 +33,7 @@ const useStyles = makeStyles((theme: Theme) =>
     createStyles({
         formRow: {
             marginTop: theme.spacing(2),
-            marginBottom: theme.spacing(2),
+            marginBottom: theme.spacing(1),
             display: 'flex',
             flexWrap: 'wrap',
             justifyContent: 'space-between',
@@ -60,7 +60,8 @@ const idService = new JournalEntryIdService();
 const date = new Date();
 
 const emptyState: JournalEntryModel = {
-    id: idService.getId(date),
+    id: '',
+    date: idService.getId(date),
     program: '',
     mobility: '',
     nutrition: {
@@ -87,12 +88,14 @@ const JournalEntry: React.FC<JournalEntryProps> = (
     const classes = useStyles(fjTheme);
 
     const [journalEntry, setJournalEntry] = React.useState<JournalEntryModel>(
-        props.journalEntry ?? emptyState
+        props.journalEntry ?? { ...emptyState, id: props.userId }
     );
 
     React.useEffect(() => {
-        setJournalEntry(props.journalEntry ?? emptyState);
-    }, [props.journalEntry]);
+        setJournalEntry(
+            props.journalEntry ?? { ...emptyState, id: props.userId }
+        );
+    }, [props.journalEntry, props.userId]);
 
     const handleCaffeineTextChange = (event: React.ChangeEvent) => {
         const element = event.target as HTMLInputElement;
@@ -213,17 +216,18 @@ const JournalEntry: React.FC<JournalEntryProps> = (
             </div>
             <TextField
                 inputProps={{ maxLength: 50 }}
-                name='id'
+                name='date'
                 onChange={handleTextChange}
                 label='Date *'
                 fullWidth
-                value={journalEntry.id}
+                value={journalEntry.date}
                 disabled={props.isReadonly}
             />
             <div className={classes.formRow}>
                 <FormLabel className={classes.formLabel}>Program *</FormLabel>
                 <MUIRichTextEditor
                     defaultValue={props.journalEntry?.program}
+                    label='Program *'
                     onChange={handleProgramChange}
                     maxLength={1000}
                     toolbar={!props.isReadonly}
@@ -260,7 +264,10 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                     disabled={props.isReadonly}
                 />
             </FormControl>
-            <FormControl fullWidth disabled={props.isReadonly}>
+            <FormControl
+                fullWidth
+                disabled={props.isReadonly}
+                className={classes.formRow}>
                 <InputLabel id='label-carbs'>Carbs?</InputLabel>
                 <Select
                     labelId='label-carbs'
@@ -273,7 +280,10 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                     <MenuItem value={Level.High}>High</MenuItem>
                 </Select>
             </FormControl>
-            <FormControl fullWidth disabled={props.isReadonly}>
+            <FormControl
+                fullWidth
+                disabled={props.isReadonly}
+                className={classes.formRow}>
                 <InputLabel id='label-gluten'>Gluten?</InputLabel>
                 <Select
                     labelId='label-gluten'
@@ -348,6 +358,7 @@ const JournalEntry: React.FC<JournalEntryProps> = (
                 <FormControl fullWidth>
                     <MUIRichTextEditor
                         defaultValue={props.journalEntry?.notes}
+                        label='Notes'
                         onChange={handleNotesChange}
                         maxLength={500}
                         toolbar={!props.isReadonly}

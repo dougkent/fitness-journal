@@ -1,7 +1,7 @@
-import { JournalEntryModel } from "../api";
+import { JournalEntryModel } from '../api';
 
-export interface JournalEntryProps
-{
+export interface JournalEntryProps {
+    userId: string;
     isReadonly: boolean;
     journalEntry: JournalEntryModel;
     onSave: (journalEntry: JournalEntryModel) => void;

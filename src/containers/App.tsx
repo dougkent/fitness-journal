@@ -20,7 +20,7 @@ Amplify.configure(awsconfig);
 
 export interface AppState {
     authState: AuthState;
-    user: object | undefined;
+    user: any;
 }
 
 class App extends React.Component<{}, AppState> {
@@ -29,12 +29,13 @@ class App extends React.Component<{}, AppState> {
 
         this.state = {
             authState: AuthState.SignedOut,
-            user: undefined,
+            user: {},
         };
     }
 
     componentDidMount = () => {
         onAuthUIStateChange((nextAuthState, authData) => {
+            console.log(authData);
             this.setState({ authState: nextAuthState, user: authData });
         });
     };
@@ -56,7 +57,11 @@ class App extends React.Component<{}, AppState> {
                             <Route
                                 exact
                                 path='/'
-                                render={() => <JournalEntries />}
+                                render={() => (
+                                    <JournalEntries
+                                        userId={this.state.user?.username}
+                                    />
+                                )}
                             />
                         </Switch>
                     </Suspense>

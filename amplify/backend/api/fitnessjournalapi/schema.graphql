@@ -1,7 +1,9 @@
-type JournalEntry
+type JournalEntryV2
     @model(timestamps: { createdAt: "createdDate" })
-    @auth(rules: [{ allow: owner }]) {
+    @auth(rules: [{ allow: owner }])
+    @key(fields: ["id", "date"]) {
     id: ID!
+    date: String!
     program: String!
     mobility: String
     nutrition: NutritionEntry

@@ -38,6 +38,7 @@ const JournalEntryDialog: React.FC<JournalEntryDialogProps> = (
             onClose={props.onClose}>
             <div className={classes.dialog}>
                 <JournalEntry
+                    userId={props.userId}
                     isReadonly={props.isReadonly}
                     journalEntry={props.journalEntry}
                     onSave={props.onSave}
