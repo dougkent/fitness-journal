@@ -1,6 +1,5 @@
-import { JournalEntryConnectionModel } from ".";
+import { JournalEntryConnectionModel } from '.';
 
-export interface ListJournalEntries
-{
-    listJournalEntrys: JournalEntryConnectionModel;
+export interface ListJournalEntries {
+    listJournalEntryV2s: JournalEntryConnectionModel;
 }

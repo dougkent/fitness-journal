@@ -1,8 +1,8 @@
-import { NutritionEntry, SleepEntry } from ".";
+import { NutritionEntry, SleepEntry } from '.';
 
-export interface JournalEntryModel
-{
+export interface JournalEntryModel {
     id: string;
+    date: string;
     program: string;
     mobility: string;
     nutrition: NutritionEntry;

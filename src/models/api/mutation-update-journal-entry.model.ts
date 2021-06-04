@@ -1,5 +1,5 @@
-import { JournalEntryModel } from ".";
+import { JournalEntryModel } from '.';
 
 export interface UpdateJournalEntryMutation {
-    updateJournalEntry: JournalEntryModel;
+    updateJournalEntryV2: JournalEntryModel;
 }

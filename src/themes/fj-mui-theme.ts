@@ -15,8 +15,8 @@ const fjTheme = createMuiTheme({
         },
         background: {
             default: '#353b3d',
-            paper: '#4f5b62'
-        }
+            paper: '#4f5b62',
+        },
     },
     shape: {
         borderRadius: 0,
@@ -60,6 +60,16 @@ const fjTheme = createMuiTheme({
         MuiFormLabel: {
             root: {
                 color: 'inherit',
+            },
+        },
+    },
+});
+
+Object.assign(fjTheme, {
+    overrides: {
+        MUIRichTextEditor: {
+            root: {
+                minHeight: 90,
             },
         },
     },

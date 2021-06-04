@@ -1,8 +1,9 @@
-export const listJournalEntries = `query ListJournalEntries($filter: ModelJournalEntryFilterInput, $nextToken: String) {
-    listJournalEntrys (filter: $filter, limit: 365, nextToken: $nextToken) {
+export const listJournalEntries = `query ListJournalEntries($id: ID!, $limit: Int!, $sortDirection: ModelSortDirection!, $nextToken: String, ) {
+    listJournalEntryV2s (id: $id, limit: $limit, sortDirection: $sortDirection, nextToken: $nextToken) {
         nextToken
         items {
             id
+            date
             program
             mobility
             nutrition {
