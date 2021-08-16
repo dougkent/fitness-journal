@@ -1,5 +1,5 @@
-export const listJournalEntries = `query ListJournalEntries($id: ID!, $limit: Int!, $sortDirection: ModelSortDirection!, $nextToken: String, ) {
-    listJournalEntryV2s (id: $id, limit: $limit, sortDirection: $sortDirection, nextToken: $nextToken) {
+export const listJournalEntries = `query ListJournalEntries($id: ID!, $sortDirection: ModelSortDirection!, $nextToken: String, ) {
+    listJournalEntryV2s (id: $id, sortDirection: $sortDirection, nextToken: $nextToken) {
         nextToken
         items {
             id

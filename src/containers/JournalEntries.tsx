@@ -202,13 +202,11 @@ class JournalEntries extends React.Component<
             loading: true,
         });
 
-        const pageSize = 14;
-
         const result = (await API.graphql(
             graphqlOperation(graphQLQueries.listJournalEntries, {
                 id: this.props.userId,
-                limit: pageSize,
                 sortDirection: 'DESC',
+                netxToken: this.state.nextToken,
             })
         )) as GraphQLResult<ListJournalEntries>;
 
